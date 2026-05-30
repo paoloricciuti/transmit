@@ -18,6 +18,7 @@ export const create_chat = form(
 		name: v.string()
 	}),
 	async ({ name }) => {
+		console.log('lskjs');
 		const chat = await db.insert(chats).values({ title: name }).returning().get();
 		redirect(303, resolve('/chat/[id]', { id: chat.id }));
 	}
@@ -39,13 +40,20 @@ export const send_message = form(
 		js_enabled: v.boolean()
 	}),
 	async ({ chat_id, message, user_id, js_enabled }) => {
+		console.log({ chat_id, message, user_id, js_enabled });
 		await db.insert(messages).values({ chat_id, message });
 		await requested(get_messages, 1).refreshAll();
 		for (const controller of controllers.get(chat_id) ?? []) {
 			controller.enqueue(text_encoder.encode(`data: ${JSON.stringify({ user_id })}\n\n`));
 		}
 		if (!js_enabled) {
-			redirect(303, resolve('/chat/[id]/[user_id]/iframe', { id: chat_id, user_id }));
+			redirect(
+				303,
+				resolve(`/chat/[id]/[user_id]/iframe?random=${Math.random()}#anchor`, {
+					id: chat_id,
+					user_id
+				})
+			);
 		}
 	}
 );

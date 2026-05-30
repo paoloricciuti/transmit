@@ -1,4 +1,5 @@
 <script lang="ts">
+	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 
 	let { children } = $props();
@@ -9,11 +10,3 @@
 </svelte:head>
 
 {@render children()}
-
-<style>
-	:global(body) {
-		margin: 0;
-		font-family: system-ui, sans-serif;
-		scroll-behavior: smooth;
-	}
-</style>

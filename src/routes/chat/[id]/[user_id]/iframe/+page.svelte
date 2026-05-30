@@ -4,7 +4,10 @@
 </script>
 
 <svelte:head>
-	<meta http-equiv="refresh" content="5" />
+	<meta
+		http-equiv="refresh"
+		content="5; url=/chat/{params.id}/{params.user_id}/iframe?rand={Math.random()}#anchor"
+	/>
 </svelte:head>
 
 <main>
@@ -14,7 +17,8 @@
 <style>
 	main {
 		width: 100vw;
-		height: 100vh;
+		height: 100dvh;
 		overflow: hidden;
+		background: var(--paper);
 	}
 </style>

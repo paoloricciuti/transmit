@@ -1,0 +1,126 @@
+/* ── transmit · global styles ──────────────────────────────────────────
+   Tokens are semantic. Dark mode is a token swap via prefers-color-scheme,
+   so it works with or without JS and never shifts layout. */
+
+@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource-variable/jetbrains-mono';
+
+:root {
+	/* warm paper surface, ink body, committed vermilion accent */
+	--paper: oklch(0.972 0.008 78);
+	--paper-raised: oklch(0.995 0.006 85);
+	--paper-sunken: oklch(0.945 0.013 74);
+
+	--ink: oklch(0.24 0.018 52);
+	--ink-soft: oklch(0.44 0.018 54);
+	--ink-faint: oklch(0.62 0.014 58);
+
+	--line: oklch(0.88 0.012 70);
+	--line-strong: oklch(0.8 0.016 66);
+
+	--accent: oklch(0.62 0.204 30);
+	--accent-deep: oklch(0.52 0.19 30);
+	--accent-tint: oklch(0.955 0.03 42);
+	--accent-glow: oklch(0.62 0.204 30 / 0.28);
+
+	/* semantic roles */
+	--bar-bg: var(--ink);
+	--bar-fg: var(--paper-raised);
+	--bar-muted: var(--ink-faint);
+	--on-accent: oklch(0.99 0.012 82);
+	--shadow-color: oklch(0.24 0.018 52 / 0.05);
+
+	--font-display: 'Fraunces Variable', Georgia, serif;
+	--font-sans: 'Space Grotesk Variable', system-ui, sans-serif;
+	--font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+
+	--ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+	color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		/* neutral gray, lightly warm (low chroma so it never reads brown) */
+		--paper: oklch(0.205 0.005 75);
+		--paper-raised: oklch(0.255 0.005 75);
+		--paper-sunken: oklch(0.165 0.004 75);
+
+		--ink: oklch(0.93 0.005 80);
+		--ink-soft: oklch(0.74 0.006 78);
+		--ink-faint: oklch(0.58 0.006 75);
+
+		--line: oklch(0.33 0.006 75);
+		--line-strong: oklch(0.43 0.007 75);
+
+		--accent: oklch(0.68 0.195 32);
+		--accent-deep: oklch(0.6 0.19 31);
+		--accent-tint: oklch(0.33 0.05 38);
+		--accent-glow: oklch(0.68 0.195 32 / 0.34);
+
+		--bar-bg: oklch(0.27 0.006 75);
+		--bar-fg: var(--ink);
+		--bar-muted: var(--ink-faint);
+		--shadow-color: oklch(0 0 0 / 0.32);
+
+		color-scheme: dark;
+	}
+}
+
+html {
+	background: var(--paper);
+}
+
+body {
+	margin: 0;
+	min-height: 100dvh;
+	background: var(--paper);
+	color: var(--ink);
+	font-family: var(--font-sans);
+	font-size: 16px;
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+	scroll-behavior: smooth;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+::selection {
+	background: var(--accent);
+	color: var(--on-accent);
+}
+
+/* tinted, slim scrollbars to match the surface */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: var(--line-strong) transparent;
+}
+*::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+	background: var(--line-strong);
+	border: 3px solid var(--paper);
+	border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+	background: var(--ink-faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.001ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.001ms !important;
+		scroll-behavior: auto !important;
+	}
+}
