@@ -68,6 +68,18 @@
 	}
 }
 
+/* Cross-document navigation (full page loads / reloads) animate via the
+   browser's native view transitions instead of flashing a white page. */
+@view-transition {
+	navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation-duration: 0.25s;
+	animation-timing-function: var(--ease-out);
+}
+
 html {
 	background: var(--paper);
 }
