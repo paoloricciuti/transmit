@@ -1,17 +1,18 @@
 <script lang="ts">
-	import Chat from '../../Chat.svelte';
+	import { resolve } from '$app/paths';
+	import Chat from '../Chat.svelte';
 	let { params } = $props();
 </script>
 
 <svelte:head>
 	<meta
 		http-equiv="refresh"
-		content="5; url=/chat/{params.id}/{params.user_id}/iframe?rand={Math.random()}#anchor"
+		content="5; url={resolve('/chat/[id]/iframe?rand={Math.random()}#anchor', { id: params.id })}"
 	/>
 </svelte:head>
 
 <main>
-	<Chat id={params.id} user_id={params.user_id} />
+	<Chat id={params.id} />
 </main>
 
 <style>

@@ -25,9 +25,12 @@
 
 	<div class="feed-region">
 		{#if browser}
-			<Chat id={params.id} {user_id} />
+			<Chat id={params.id} />
 		{:else}
-			<iframe name="chat" src="/chat/{params.id}/{user_id}/iframe#anchor" title="Chat iframe"
+			<iframe
+				name="chat"
+				src={resolve('/chat/[id]/iframe#anchor', { id: params.id })}
+				title="Chat iframe"
 			></iframe>
 		{/if}
 	</div>

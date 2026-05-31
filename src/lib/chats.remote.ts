@@ -1,13 +1,10 @@
-import { form, query, requested } from '$app/server';
-import { eq } from 'drizzle-orm';
+import { resolve } from '$app/paths';
+import { form, query } from '$app/server';
+import { redirect } from '@sveltejs/kit';
+import { desc, eq } from 'drizzle-orm';
+import * as v from 'valibot';
 import { db } from './server/db';
 import { chats, messages } from './server/db/schema';
-import * as v from 'valibot';
-import { redirect } from '@sveltejs/kit';
-import { resolve } from '$app/paths';
-import { controllers } from './controller';
-
-const text_encoder = new TextEncoder();
 
 export const get_chats = query(() => {
 	return db.select().from(chats).all();
@@ -24,12 +21,20 @@ export const create_chat = form(
 	}
 );
 
-export const get_messages = query(v.string(), async (id) => {
-	const msgs = await db.select().from(messages).where(eq(messages.chat_id, id)).all();
-	return msgs.reduce<typeof msgs>((acc, _msg, i, arr) => {
-		acc.push(arr.at(arr.length - 1 - i)!);
-		return acc;
-	}, []);
+let { promise, resolve: promise_resolve } = Promise.withResolvers<void>();
+
+export const get_messages = query.live(v.string(), async function* (id) {
+	while (true) {
+		// refetch everytime just to make sure...we could resolve the message and just append that tho
+		const msgs = await db
+			.select()
+			.from(messages)
+			.where(eq(messages.chat_id, id))
+			.orderBy(desc(messages.created_at))
+			.all();
+		yield msgs;
+		await promise;
+	}
 });
 
 export const send_message = form(
@@ -39,18 +44,15 @@ export const send_message = form(
 		user_id: v.string(),
 		js_enabled: v.boolean()
 	}),
-	async ({ chat_id, message, user_id, js_enabled }) => {
+	async ({ chat_id, message, js_enabled }) => {
 		await db.insert(messages).values({ chat_id, message });
-		await requested(get_messages, 1).refreshAll();
-		for (const controller of controllers.get(chat_id) ?? []) {
-			controller.enqueue(text_encoder.encode(`data: ${JSON.stringify({ user_id })}\n\n`));
-		}
+		promise_resolve();
+		({ promise, resolve: promise_resolve } = Promise.withResolvers<void>());
 		if (!js_enabled) {
 			redirect(
 				303,
-				resolve(`/chat/[id]/[user_id]/iframe?random=${Math.random()}#anchor`, {
-					id: chat_id,
-					user_id
+				resolve(`/chat/[id]/iframe?random=${Math.random()}#anchor`, {
+					id: chat_id
 				})
 			);
 		}

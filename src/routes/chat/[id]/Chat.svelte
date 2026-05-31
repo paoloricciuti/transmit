@@ -1,28 +1,12 @@
 <script lang="ts">
 	import { get_messages } from '$lib/chats.remote';
-	let { id, user_id } = $props();
-
+	let { id } = $props();
 	const id_der = $derived(id);
-
-	$effect(() => {
-		const event_source = new EventSource(`/chat/${id_der}/sse`);
-
-		event_source.addEventListener('message', ({ data }) => {
-			if (data.user_id === user_id) {
-				return;
-			}
-			get_messages(id).refresh();
-		});
-
-		return () => {
-			event_source.close();
-		};
-	});
 </script>
 
 <div class="wrapper">
 	<ol class="feed">
-		{#each await get_messages(id) as message, i (message.id)}
+		{#each await get_messages(id_der) as message, i (message.id)}
 			<li class="msg" class:latest={i === 0}>
 				<span class="node" aria-hidden="true"></span>
 				<div class="body">
