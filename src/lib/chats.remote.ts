@@ -40,7 +40,6 @@ export const send_message = form(
 		js_enabled: v.boolean()
 	}),
 	async ({ chat_id, message, user_id, js_enabled }) => {
-		console.log({ chat_id, message, user_id, js_enabled });
 		await db.insert(messages).values({ chat_id, message });
 		await requested(get_messages, 1).refreshAll();
 		for (const controller of controllers.get(chat_id) ?? []) {
