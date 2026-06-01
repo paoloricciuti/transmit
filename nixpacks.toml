@@ -1,10 +1,5 @@
-[phases.setup]
-nixPkgs = ["nodejs_24"]
-
 [phases.install]
 cmds = [
-  "npm install -g corepack@latest",
-  "corepack enable",
-  "corepack prepare pnpm@11.2.2 --activate",
+  "npm install -g pnpm@11.2.2",
   "pnpm install --frozen-lockfile",
 ]
