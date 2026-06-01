@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1780307352409,
+      "tag": "0000_nifty_lyja",
+      "breakpoints": true
+    }
+  ]
+}
