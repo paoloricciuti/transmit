@@ -1,42 +1,15 @@
-# sv
+# transmit
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+This project is mostly an experiment. I wanted to see what it could take to build something seemingly impossible to do without JS using the power of HTML, CSS a sprinkle of HTTP and obviously Svelte and SvelteKit.
 
-## Creating a project
+## How it works?
 
-If you're seeing this, you've probably already done this step. Congrats!
+There are a combination of techniques to make this works flawlessly and I will explore them in a future blogpost but the gist of it is:
 
-```sh
-# create a new project
-npx sv create my-app
-```
+1. there's a single [Chat.svelte](src/routes/chat/[id]/Chat.svelte) component that is used both when the user load the page from the browser and when it navigates to it with the client side router.
+1. If the page is loaded from the server it initially renders an iframe that points to a [route](src/routes/chat/[id]/iframe/+page.svelte) that only renders the messages.
+1. The iframe has a `<meta http-equiv="Refresh" />` header that reloads the page every 5 seconds to achieve "live" messages
+1. When `browser` is `true` instead of rendering the iframe we render the component that uses a `query.live` to get the updated messages.
+1. The form has a target of the iframe name which means on submit it will refresh the iframe instead of navigating away.
 
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-pnpm dlx sv@0.15.3 create --template minimal --types ts --add prettier eslint drizzle="database:sqlite+sqlite:turso" --install pnpm chat-pe
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+There's also a bunch of extra stuff to make it look the same in both cases.
