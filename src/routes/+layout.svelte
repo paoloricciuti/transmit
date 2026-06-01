@@ -21,6 +21,7 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	<title>transmit - a progressive enhancement experiment</title>
 </svelte:head>
 
 {@render children()}
