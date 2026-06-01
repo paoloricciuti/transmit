@@ -1,9 +1,40 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { create_chat, get_chats } from '$lib/chats.remote';
+	import { get_user, sign_out } from '$lib/auth.remote';
+
+	const user = $derived(await get_user());
 </script>
 
 <main>
+	<nav class="account">
+		<span class="who">
+			{#if user.image}
+				<img src={user.image} alt="" width="22" height="22" />
+			{/if}
+			<span class="who-name">{user.name}</span>
+		</span>
+		<form {...sign_out}>
+			<button class="signout" type="submit" title="Sign out" aria-label="Sign out">
+				<svg
+					viewBox="0 0 24 24"
+					width="16"
+					height="16"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					aria-hidden="true"
+				>
+					<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+					<polyline points="16 17 21 12 16 7" />
+					<line x1="21" y1="12" x2="9" y2="12" />
+				</svg>
+			</button>
+		</form>
+	</nav>
+
 	<header class="masthead">
 		<span class="logo" aria-hidden="true"></span>
 		<h1>transmit</h1>
@@ -56,6 +87,56 @@
 		display: flex;
 		flex-direction: column;
 		gap: clamp(2rem, 5vh, 3rem);
+	}
+
+	.account {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		min-height: 1.75rem;
+		margin-top: -0.5rem;
+	}
+	.who {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.9rem;
+		color: var(--ink-soft);
+	}
+	.who img {
+		border-radius: 50%;
+		object-fit: cover;
+	}
+	.who-name {
+		font-weight: 500;
+		color: var(--ink);
+	}
+	.account form {
+		display: flex;
+		margin: 0;
+	}
+	.signout {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.3rem;
+		border: none;
+		border-radius: 8px;
+		background: transparent;
+		color: var(--ink-faint);
+		cursor: pointer;
+		transition:
+			color 0.18s var(--ease-out),
+			background-color 0.18s var(--ease-out);
+	}
+	.signout:hover {
+		color: var(--accent);
+		background: var(--paper-raised);
+	}
+	.signout:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
 	}
 
 	.masthead {

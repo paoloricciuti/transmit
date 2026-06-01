@@ -7,7 +7,7 @@
 <svelte:head>
 	<meta
 		http-equiv="refresh"
-		content="5; url={resolve('/chat/[id]/iframe?rand={Math.random()}#anchor', { id: params.id })}"
+		content="5; url={resolve(`/chat/[id]/iframe?rand=${Math.random()}#anchor`, { id: params.id })}"
 	/>
 </svelte:head>
 

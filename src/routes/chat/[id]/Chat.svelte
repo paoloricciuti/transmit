@@ -1,18 +1,33 @@
 <script lang="ts">
+	import { get_user } from '$lib/auth.remote';
 	import { get_messages } from '$lib/chats.remote';
+	import type { Attachment } from 'svelte/attachments';
 	let { id } = $props();
 	const id_der = $derived(id);
+	const user = $derived(await get_user());
 </script>
 
 <div class="wrapper">
 	<ol class="feed">
 		{#each await get_messages(id_der) as message, i (message.id)}
-			<li class="msg" class:latest={i === 0}>
+			{const mine = $derived(message.author_id === (user.id))}
+			{const scroll: Attachment<HTMLLIElement> | undefined = $derived(i === 0 ? (node)=>{node.scrollIntoView({ behavior: 'smooth' })} : undefined)}
+			<li {@attach scroll} class="msg" class:latest={i === 0} class:mine={mine}>
 				<span class="node" aria-hidden="true"></span>
 				<div class="body">
-					{#if i === 0}
-						<span class="tag">live</span>
-					{/if}
+					<span class="author">
+						{#if message.author_image}
+							<img class="avatar" src={message.author_image} alt="" width="18" height="18" />
+						{:else}
+							<span class="avatar avatar-fallback" aria-hidden="true"
+								>{message.author_name.slice(0, 1)}</span
+							>
+						{/if}
+						<span class="author-name">{mine ? 'You' : message.author_name}</span>
+						{#if i === 0}
+							<span class="tag">live</span>
+						{/if}
+					</span>
 					<p>{message.message}</p>
 				</div>
 			</li>
@@ -147,6 +162,45 @@
 		border-radius: 50%;
 		background: var(--accent);
 		animation: pulse 2.4s var(--ease-out) infinite;
+	}
+
+	.author {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		margin-bottom: 0.25rem;
+	}
+	.author .tag {
+		margin-left: auto;
+		margin-bottom: 0;
+	}
+	.avatar {
+		flex-shrink: 0;
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		object-fit: cover;
+		background: var(--paper-sunken);
+	}
+	.avatar-fallback {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-family: var(--font-mono);
+		font-size: 0.6rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		color: var(--ink-soft);
+		border: 1px solid var(--line-strong);
+	}
+	.author-name {
+		font-size: 0.78rem;
+		font-weight: 600;
+		letter-spacing: 0.01em;
+		color: var(--ink-soft);
+	}
+	.mine .author-name {
+		color: var(--accent-deep);
 	}
 
 	.empty {

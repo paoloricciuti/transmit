@@ -2,10 +2,11 @@
 	import { browser } from '$app/environment';
 	import { resolve } from '$app/paths';
 	import { send_message } from '$lib/chats.remote.js';
+	import { get_user, sign_out } from '$lib/auth.remote';
 	import Chat from './Chat.svelte';
 
 	let { params } = $props();
-	const user_id = crypto.randomUUID();
+	const user = $derived(await get_user());
 </script>
 
 <main>
@@ -17,9 +18,36 @@
 				<span class="wordmark">transmit</span>
 			</a>
 		</div>
-		<div class="channel">
-			<span class="status">live</span>
-			<span class="chan-id">#{params.id.slice(0, 8)}</span>
+		<div class="right">
+			<div class="channel">
+				<span class="chan-id">#{params.id.slice(0, 8)}</span>
+			</div>
+			<span class="me">
+				{#if user.image}
+					<img class="me-avatar" src={user.image} alt="" width="22" height="22" />
+				{:else}
+					<span class="me-avatar me-fallback" aria-hidden="true">{user.name.slice(0, 1)}</span>
+				{/if}
+				<form {...sign_out}>
+					<button class="signout" type="submit" title="Sign out" aria-label="Sign out">
+						<svg
+							viewBox="0 0 24 24"
+							width="16"
+							height="16"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							aria-hidden="true"
+						>
+							<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+							<polyline points="16 17 21 12 16 7" />
+							<line x1="21" y1="12" x2="9" y2="12" />
+						</svg>
+					</button>
+				</form>
+			</span>
 		</div>
 	</header>
 
@@ -37,13 +65,28 @@
 
 	<form class="composer" {...send_message} target={browser ? undefined : 'chat'}>
 		<input {...send_message.fields.js_enabled.as('hidden', browser)} />
-		<input {...send_message.fields.user_id.as('hidden', user_id)} />
 		<input
 			class="composer-input"
 			placeholder="Write a message"
 			autocomplete="off"
 			{...send_message.fields.message.as('text')}
 		/>
+		<button class="composer-reset" type="reset" title="Clear" aria-label="Clear message">
+			<svg
+				viewBox="0 0 24 24"
+				width="16"
+				height="16"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				aria-hidden="true"
+			>
+				<line x1="18" y1="6" x2="6" y2="18" />
+				<line x1="6" y1="6" x2="18" y2="18" />
+			</svg>
+		</button>
 		<button class="composer-send" {...send_message.fields.chat_id.as('submit', params.id)}>
 			Send
 			<span class="arrow" aria-hidden="true">&rarr;</span>
@@ -62,7 +105,7 @@
 		gap: clamp(0.75rem, 2vw, 1.15rem);
 		width: 100%;
 		height: 100dvh;
-		max-width: 940px;
+		max-width: 620px;
 		margin-inline: auto;
 		padding: clamp(0.85rem, 2.5vw, 1.5rem);
 		box-sizing: border-box;
@@ -107,23 +150,61 @@
 		font-family: var(--font-mono);
 		font-size: 0.72rem;
 	}
-	.status {
+	.right {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+	.me {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.45em;
-		text-transform: uppercase;
-		letter-spacing: 0.18em;
-		font-weight: 600;
-		color: var(--bar-fg);
+		gap: 0.45rem;
+		padding-left: 1rem;
+		border-left: 1px solid var(--bar-muted);
 	}
-	.status::before {
-		content: '';
-		width: 7px;
-		height: 7px;
+	.me-avatar {
+		flex-shrink: 0;
+		width: 22px;
+		height: 22px;
 		border-radius: 50%;
+		object-fit: cover;
+	}
+	.me-fallback {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-family: var(--font-mono);
+		font-size: 0.7rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		color: var(--bar-fg);
 		background: var(--accent);
-		box-shadow: 0 0 0 0 var(--accent-glow);
-		animation: beacon 2.4s var(--ease-out) infinite;
+	}
+	.me form {
+		display: flex;
+		margin: 0;
+	}
+	.signout {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.3rem;
+		border: none;
+		border-radius: 8px;
+		background: transparent;
+		color: var(--bar-muted);
+		cursor: pointer;
+		transition:
+			color 0.18s var(--ease-out),
+			background-color 0.18s var(--ease-out);
+	}
+	.signout:hover {
+		color: var(--accent);
+		background: oklch(1 0 0 / 0.06);
+	}
+	.signout:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
 	}
 	.chan-id {
 		color: var(--bar-muted);
@@ -148,7 +229,7 @@
 	/* composer */
 	.composer {
 		display: grid;
-		grid-template-columns: 1fr auto;
+		grid-template-columns: 1fr auto auto;
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.4rem 0.4rem 0.4rem 1.2rem;
@@ -176,6 +257,24 @@
 	}
 	.composer-input::placeholder {
 		color: var(--ink-faint);
+	}
+	.composer-reset {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.5rem;
+		border: none;
+		background: transparent;
+		color: var(--ink-faint);
+		cursor: pointer;
+		transition: color 0.18s var(--ease-out);
+	}
+	.composer-reset:hover {
+		color: var(--ink);
+	}
+	.composer-reset:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
 	}
 	.composer-send {
 		display: inline-flex;
@@ -211,22 +310,15 @@
 		transform: translateX(3px);
 	}
 
-	@keyframes beacon {
-		0%,
-		100% {
-			box-shadow: 0 0 0 0 var(--accent-glow);
-		}
-		50% {
-			box-shadow: 0 0 0 5px transparent;
-		}
-	}
-
 	@media (max-width: 540px) {
 		.composer-send {
 			padding: 0.7rem 1.05rem;
 		}
 		.wordmark {
 			font-size: 1.1rem;
+		}
+		.me {
+			padding-left: 0.85rem;
 		}
 	}
 </style>
